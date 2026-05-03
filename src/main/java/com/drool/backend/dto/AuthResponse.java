@@ -14,6 +14,7 @@ public class AuthResponse {
 
     // this is th response sent from the backend to the fronted as a response for their sign in or sign up request
     private Long id;
+//    private String username;
     private String name;
     private String email;
     private String avatar;

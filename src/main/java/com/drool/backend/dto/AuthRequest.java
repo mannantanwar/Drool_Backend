@@ -10,10 +10,9 @@ import lombok.Setter;
 @Setter
 public class AuthRequest {
 
-    // this is sent from the frontend the request DTO in ehich the user sends the username and the password
     @Email
     @NotBlank
-    private String username;
+    private String email;
 
     @NotBlank
     private String password;
