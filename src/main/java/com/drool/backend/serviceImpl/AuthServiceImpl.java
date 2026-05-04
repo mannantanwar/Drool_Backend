@@ -4,6 +4,8 @@ import com.drool.backend.dto.AuthRequest;
 import com.drool.backend.dto.AuthResponse;
 import com.drool.backend.dto.RegisterRequest;
 import com.drool.backend.entity.Role;
+import com.drool.backend.exception.BadRequestException;
+import com.drool.backend.exception.ResourceNotFoundException;
 import com.drool.backend.repository.UserRepository;
 import com.drool.backend.security.JwtService;
 import com.drool.backend.service.AuthService;
@@ -26,11 +28,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse register(RegisterRequest request){
         if(userRepository.existsByEmail(request.getEmail())){
-            throw new RuntimeException("Email already exists");
+            throw new BadRequestException("Email already exists");;
         }
 
         if(userRepository.existsByUsername(request.getUsername())){
-            throw new RuntimeException("Username already exists");
+            throw new BadRequestException("Username already exists");
         }
 
         User user = User.builder()
@@ -74,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
         );
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         org.springframework.security.core.userdetails.UserDetails userDetails =
                 org.springframework.security.core.userdetails.User
