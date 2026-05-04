@@ -35,8 +35,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex){
         String message =ex.getBindingResult()
-                .getFieldError()
-                .get(0),
+                .getFieldErrors()
+                .get(0)
                 .getDefaultMessage();
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "inernal face",
+                "internal face",
                 ex.getMessage()
         );
         return new ResponseEntity<>(response , HttpStatus.INTERNAL_SERVER_ERROR);

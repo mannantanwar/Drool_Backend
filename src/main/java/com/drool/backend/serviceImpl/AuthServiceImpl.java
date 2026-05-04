@@ -28,7 +28,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse register(RegisterRequest request){
         if(userRepository.existsByEmail(request.getEmail())){
-            throw new BadRequestException("Email already exists");;
+            throw new BadRequestException("Email already exists");
         }
 
         if(userRepository.existsByUsername(request.getUsername())){
