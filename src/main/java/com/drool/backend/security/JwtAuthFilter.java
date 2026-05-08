@@ -27,33 +27,43 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
+        log.info("Processing request to: {} with Authorization header: {}", 
+                 request.getRequestURI(), 
+                 authHeader != null ? "Bearer ***" : "null");
+
         if(authHeader== null || !authHeader.startsWith("Bearer ") ){
-            log.debug("No Bearer token found in request to {}", request.getRequestURI());
+            log.warn("No Bearer token found in request to {}", request.getRequestURI());
             filterChain.doFilter(request,response);
             return;
         }
 
         try {
             jwt = authHeader.substring(7);
+            log.debug("JWT token extracted, length: {}", jwt.length());
+            
             userEmail= jwtService.extractEmail(jwt);
-            log.debug("Extracted email from token: {}", userEmail);
+            log.info("Extracted email from token: {}", userEmail);
 
             if(userEmail!= null && SecurityContextHolder.getContext().getAuthentication() == null){
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(userEmail);
-                log.debug("Loaded user details for: {}", userEmail);
+                log.info("Loaded user details for: {}, Authorities: {}", userEmail, userDetails.getAuthorities());
 
                 if(jwtService.isValidToken(jwt,userDetails)){
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.debug("Authentication successful for user: {}", userEmail);
+                    log.info("✓ Authentication successful for user: {} with authorities: {}", userEmail, userDetails.getAuthorities());
                 } else {
-                    log.warn("Invalid token for user: {}", userEmail);
+                    log.error("✗ Invalid token for user: {}", userEmail);
                 }
+            } else if (userEmail == null) {
+                log.error("✗ Could not extract email from token");
+            } else {
+                log.debug("User already authenticated: {}", SecurityContextHolder.getContext().getAuthentication().getName());
             }
         } catch (Exception e) {
-            log.error("Error processing JWT token: {}", e.getMessage());
+            log.error("✗ Error processing JWT token: {} - {}", e.getClass().getSimpleName(), e.getMessage(), e);
         }
         
         filterChain.doFilter(request,response);
